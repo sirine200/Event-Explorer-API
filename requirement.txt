@@ -1,0 +1,11 @@
+Flask==2.1.0
+Flask-SQLAlchemy==2.5.1
+Flask-Login==0.5.0
+Flask-OAuthlib==0.9.6
+Flask-WTF==0.15.1
+Flask-JWT-Extended==4.2.1
+Flask-Migrate==3.1.0
+SQLAlchemy==1.4.31
+Werkzeug==2.0.3
+secrets==1.0.2
+flasgger==0.9.5 

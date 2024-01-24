@@ -1,0 +1,16 @@
+<!-- templates/bookmarked_events.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Bookmarked Events</h2>
+  {% if events %}
+    <ul>
+      {% for event in events %}
+        <li>{{ event.title }} - {{ event.date }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No bookmarked events.</p>
+  {% endif %}
+{% endblock %}

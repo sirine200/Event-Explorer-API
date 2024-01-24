@@ -1,0 +1,460 @@
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: "Tunisian Tapestry API"
+  description: "API documentation for the Tunisian Event Explorer application"
+
+paths:
+  /:
+    get:
+      summary: Get Home Page
+      description: Returns the home page message
+      responses:
+        200:
+          description: Returns the home page message
+          content:
+            application/json:
+              example:
+                message: Home page
+
+  /register:
+    post:
+      summary: User Registration
+      description: Returns a message indicating successful account creation
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: registration_data
+          description: User registration data in JSON format
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                description: The username for registration
+              email:
+                type: string
+                format: email
+                description: The email for registration
+              password:
+                type: string
+                description: The password for registration
+      responses:
+        201:
+          description: Returns a message indicating successful account creation
+          content:
+            application/json:
+              example:
+                message: Account created successfully! You can now log in
+        400:
+          description: Returns an error message for incomplete JSON data
+          content:
+            application/json:
+              example:
+                error: Incomplete JSON data
+
+  /login:
+    get:
+      summary: Initiate Login
+      description: Returns the authorization URL for redirection
+      responses:
+        200:
+          description: Returns the authorization URL for redirection
+          content:
+            application/json:
+              example:
+                message: Redirection disabled for testing
+                authorization_url: http://example.com/auth
+
+  /callback:
+    get:
+      summary: Callback after Login
+      description: Returns a message indicating successful callback
+      responses:
+        200:
+          description: Returns a message indicating successful callback
+          content:
+            application/json:
+              example:
+                message: Callback successful
+
+  /logout:
+    get:
+      summary: Logout User
+      description: Returns a message indicating successful logout
+      responses:
+        200:
+          description: Returns a message indicating successful logout
+          content:
+            application/json:
+              example:
+                message: Logged out successfully
+
+  /login/JWT:
+    post:
+      summary: Login with JWT
+      description: Returns a message indicating successful login along with an access token
+      parameters:
+        - name: username
+          in: formData
+          type: string
+          required: true
+          description: The username for login
+        - name: password
+          in: formData
+          type: string
+          required: true
+          description: The password for login
+      responses:
+        200:
+          description: Returns a message indicating successful login along with an access token
+          content:
+            application/json:
+              example:
+                message: Login successful
+                access_token: <your_access_token>
+        401:
+          description: Returns a message indicating invalid credentials
+          content:
+            application/json:
+              example:
+                message: Invalid credentials
+
+  /create_event:
+    post:
+      summary: Create Event (JWT Required)
+      description: Returns a message indicating successful event creation
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: title
+          type: string
+          required: true
+          description: The title of the event
+        - in: formData
+          name: description
+          type: string
+          description: The description of the event
+        - in: formData
+          name: date
+          type: string
+          format: date
+          description: The date of the event (YYYY-MM-DD)
+        - in: formData
+          name: location
+          type: string
+          description: The location of the event
+        - in: formData
+          name: category
+          type: string
+          description: The category of the event
+        - in: formData
+          name: image
+          type: file
+          description: The image file for the event
+        - in: formData
+          name: tickets_available
+          type: integer
+          description: The number of available tickets for the event
+        - in: formData
+          name: ticket_price
+          type: number
+          description: The price of each ticket
+      responses:
+        201:
+          description: Returns a message indicating successful event creation
+          content:
+            application/json:
+              example:
+                message: Event created successfully!
+        400:
+          description: Returns validation errors for form data
+          content:
+            application/json:
+              example:
+                errors: {'title': ['Field is required']}
+  /events:
+    get:
+      summary: Get All Events
+      description: Returns a list of all events
+      responses:
+        200:
+          description: Returns a list of all events
+          content:
+            application/json:
+              example:
+                - title: Event 1
+                  description: Event 1 description
+                  date: "2022-01-31"
+                  location: Location 1
+                  category: Category 1
+                  image: event1.jpg
+                  tickets_available: 100
+                  ticket_price: 10.0
+                - title: Event 2
+                  description: Event 2 description
+                  date: "2022-02-15"
+                  location: Location 2
+                  category: Category 2
+                  image: event2.jpg
+                  tickets_available: 50
+                  ticket_price: 15.0
+        404:
+          description: Returns a message if no events are found
+          content:
+            application/json:
+              example:
+                message: 'No events found'
+
+  /search_event:
+    get:
+      summary: Search for an Event
+      description: Returns details of the searched event
+      parameters:
+        - in: query
+          name: title
+          type: string
+          required: true
+          description: The title of the event to search for
+      responses:
+        200:
+          description: Returns details of the searched event
+          content:
+            application/json:
+              example:
+                title: Event 1
+                description: Event 1 description
+                date: "2022-01-31"
+                location: Location 1
+                category: Category 1
+                image: event1.jpg
+                tickets_available: 100
+                ticket_price: 10.0
+        400:
+          description: Returns an error message if the title is not provided
+          content:
+            application/json:
+              example:
+                error: 'Please enter a title to search.'
+        404:
+          description: Returns a message if the event is not found
+          content:
+            application/json:
+              example:
+                error: 'Event not found!'
+
+  /purchase_ticket/{event_id}:
+    post:
+      summary: Purchase Ticket (JWT Required)
+      description: Returns a message indicating successful ticket purchase
+      parameters:
+        - in: path
+          name: event_id
+          type: integer
+          required: true
+          description: The ID of the event to purchase tickets for
+        - in: body
+          name: purchase_data
+          description: JSON data containing the number of tickets to purchase
+          schema:
+            type: object
+            properties:
+              num_tickets:
+                type: integer
+                minimum: 1
+                description: The number of tickets to purchase
+      responses:
+        201:
+          description: Returns a message indicating successful ticket purchase
+          content:
+            application/json:
+              example:
+                message: '2 ticket(s) purchased successfully!'
+        400:
+          description: Returns an error message for invalid input or insufficient tickets
+          content:
+            application/json:
+              example:
+                message: 'Invalid input for number of tickets. Please provide a positive integer.'
+        404:
+          description: Returns a message if the user or event is not found
+          content:
+            application/json:
+              example:
+                message: 'User not found'
+
+  /bookmark/{event_id}:
+    post:
+      summary: Bookmark Event (JWT Required)
+      description: Returns a message indicating successful event bookmarking
+      parameters:
+        - in: path
+          name: event_id
+          type: integer
+          required: true
+          description: The ID of the event to be bookmarked
+      responses:
+        201:
+          description: Returns a message indicating successful event bookmarking
+          content:
+            application/json:
+              example:
+                message: Event bookmarked successfully!
+        200:
+          description: Returns a message indicating the event is already bookmarked
+          content:
+            application/json:
+              example:
+                message: Event is already bookmarked
+        404:
+          description: Returns a message if the user or event is not found
+          content:
+            application/json:
+              example:
+                message: User or event not found
+
+  /bookmarked_events:
+    get:
+      summary: Get Bookmarked Events (JWT Required)
+      description: Returns a list of bookmarked events for the current user
+      responses:
+        200:
+          description: Returns a list of bookmarked events for the current user
+          content:
+            application/json:
+              example:
+                events:
+                  - title: Event 1
+                    description: Event 1 description
+                    date: "2022-01-31"
+                    location: Location 1
+                    category: Category 1
+                    image: event1.jpg
+                  - title: Event 2
+                    description: Event 2 description
+                    date: "2022-02-15"
+                    location: Location 2
+                    category: Category 2
+                    image: event2.jpg
+        404:
+          description: Returns a message if the user is not found
+          content:
+            application/json:
+              example:
+                message: User not found
+
+  /setup:
+    get:
+      summary: Initialize Application and Database
+      description: |
+        Run this endpoint to initialize the Flask application and create necessary database tables.
+
+        **Note:** This endpoint is intended for setup purposes and should be used with caution.
+      responses:
+        200:
+          description: Application and Database initialized successfully.
+
+dependencies:
+  description: "List of installed packages used in the Flask application and their versions."
+  dependencies:
+    - Flask==2.1.0
+    - Flask-SQLAlchemy==2.5.1
+    - Flask-Login==0.5.0
+    - Flask-OAuthlib==0.9.6
+    - Flask-WTF==0.15.1
+    - Flask-JWT-Extended==4.2.1
+    - Flask-Migrate==3.1.0
+    - SQLAlchemy==1.4.31
+    - Werkzeug==2.0.3
+    - secrets==1.0.2
+
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        example: 1
+      username:
+        type: string
+        example: "john_doe"
+      email:
+        type: string
+        example: "john.doe@example.com"
+      password_hash:
+        type: string
+        example: "$2b$12$ErtZcJLjWDSZJzF7edrHf.VQ5rMt5C7Y6iCQ.7uL.K1FuG8A5HsNu"  
+
+  Event:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+        example: 1
+      title:
+        type: string
+        example: "Awesome Event"
+      description:
+        type: string
+        example: "An amazing event description."
+      date:
+        type: string
+        format: date-time
+        example: "2024-01-23T18:25:43.511Z"
+      location:
+        type: string
+        example: "Event Venue"
+      category:
+        type: string
+        example: "Concert"
+      image:
+        type: string
+        example: "https://example.com/image.jpg"
+      price:
+        type: number
+        format: float
+        example: 20.5
+      user_id:
+        type: integer
+        format: int64
+        example: 1
+      tickets_available:
+        type: integer
+        example: 100
+      ticket_price:
+        type: number
+        format: float
+        example: 10.0
+   
+
+  Participant:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        format: int64
+        example: 1
+      event_id:
+        type: integer
+        format: int64
+        example: 1
+      num_tickets_purchased:
+        type: integer
+        example: 2
+   
+
+  Bookmark:
+    type: object
+    properties:
+      user_id:
+        type: integer
+        format: int64
+        example: 1
+      event_id:
+        type: integer
+        format: int64
+        example: 1
